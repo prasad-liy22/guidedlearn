@@ -1,0 +1,5 @@
+[
+  { "id": 1, "subject": "Node.js Basics", "level": "Beginner" },
+  { "id": 2, "subject": "React.js Frontend", "level": "Intermediate" },
+  { "id": 3, "subject": "AI Roadmap Generator", "level": "Advanced" }
+]

@@ -1,0 +1,14 @@
+@import "tailwindcss";
+
+/* --- Fix for Browser Autofill White Background --- */
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus, 
+input:-webkit-autofill:active {
+    /* තද අළු පාටක් පසුබිමට දෙනවා (slate-900 වලට සමාන) */
+    -webkit-box-shadow: 0 0 0 30px #0f172a inset !important;
+    /* අකුරු වල පාට සුදු කරනවා */
+    -webkit-text-fill-color: #f8fafc !important;
+    /* සුදු පාටට හැරෙන එක නවත්වන මායාව */
+    transition: background-color 5000s ease-in-out 0s;
+}
