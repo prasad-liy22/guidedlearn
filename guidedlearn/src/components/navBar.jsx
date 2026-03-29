@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom'; // 💡 useLocation එක මෙතනට ගත්තා
 import { useAuth } from '../context/AuthContext';
 import { LayoutDashboard, LogOut, User as UserIcon } from 'lucide-react';
 
@@ -8,8 +8,9 @@ function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
+  const location = useLocation();
 
-  // 💡 Dropdown එකෙන් එළියේ click කළොත් ඒක වහන Logic එක
+  // Dropdown එකෙන් එළියේ click කළොත් ඒක වහන Logic එක
   useEffect(() => {
     function handleClickOutside(event) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -25,11 +26,16 @@ function Navbar() {
     setIsOpen(false);
   };
 
+  const isLearningBench = location.pathname.includes('/pathway/');
+
   return (
-    <div className="pt-6 px-4 sm:px-6 lg:px-8 sticky top-0 z-50">
+    // 💡 1. මෙන්න මේ ප්‍රධානම Wrapper එකෙන් තමයි අපි දැන් NavBar එක පාලනය කරන්නේ!
+    // isLearningBench true නම් 'absolute' වෙනවා (එතකොට පල්ලෙහාට එන්නේ නෑ).
+    // නැත්නම් 'sticky top-0' වෙනවා (එතකොට පාවෙවී පල්ලෙහාට එනවා).
+    <div className={`pt-6 px-4 sm:px-6 lg:px-8 w-full z-50 transition-all duration-300 ${isLearningBench ? 'absolute top-0 left-0 right-0' : 'sticky top-0'}`}>
       
-      {/* ප්‍රධාන Navbar එක */}
-      <nav className="max-w-6xl mx-auto bg-white/5 backdrop-blur-xl border border-white/10 shadow-[0_8px_32px_rgba(6,182,212,0.15)] rounded-2xl px-6 py-3 transition-all duration-300">
+      {/* 2. ප්‍රධාන Navbar එක (මේකේ තිබ්බ අමතර දේවල් අයින් කළා) */}
+      <nav className="max-w-6xl mx-auto bg-white/5 backdrop-blur-xl border border-white/10 shadow-[0_8px_32px_rgba(6,182,212,0.15)] rounded-2xl px-6 py-3">
         <div className="flex justify-between items-center">
           
           {/* 1. Logo */}
@@ -61,7 +67,7 @@ function Navbar() {
               
               <div className="flex items-center gap-3 md:gap-6">
                 
-                {/* 💡 Dashboard Button (කෙලින්ම Navbar එකේ පේන්න දැම්මා) */}
+                {/* Dashboard Button */}
                 <Link 
                   to="/dashboard" 
                   className="hidden sm:flex items-center gap-2 text-cyan-400 hover:text-cyan-300 text-sm font-bold transition-colors bg-cyan-500/10 px-4 py-2 rounded-xl border border-cyan-500/20"
@@ -70,10 +76,10 @@ function Navbar() {
                   Dashboard
                 </Link>
 
-                {/* පොඩි ඉරක් (Divider) */}
+                {/* Divider */}
                 <div className="hidden sm:block w-px h-6 bg-slate-700/50"></div>
 
-                {/* 💡 Dropdown Menu Section */}
+                {/* Dropdown Menu Section */}
                 <div className="relative" ref={dropdownRef}>
                   
                   {/* Profile Picture Trigger Button */}
@@ -94,7 +100,7 @@ function Navbar() {
                     </div>
                   </button>
 
-                  {/* 💡 Dropdown Card (Profile & Logout පමණයි) */}
+                  {/* Dropdown Card */}
                   {isOpen && (
                     <div className="absolute right-0 mt-3 w-56 bg-slate-900/95 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] py-2 z-50 animate-in fade-in zoom-in duration-200 origin-top-right">
                       
@@ -134,7 +140,7 @@ function Navbar() {
 
             ) : (
               
-              /* --- ලොග් වෙලා නැතිනම් පේන බට්න් දෙක --- */
+              /* ලොග් වෙලා නැතිනම් පේන බට්න් දෙක */
               <div className="flex items-center space-x-3 sm:space-x-4">
                 <Link to="/signin" className="text-gray-300 hover:text-cyan-400 text-sm font-semibold transition-colors duration-300">
                   Sign In

@@ -12,6 +12,7 @@ import EmailVerification from './pages/EmailVerification';
 import ProtectedRoute from './components/ProtectedRoute';
 import Dashboard from './pages/Dashboard';
 import AdminPanel from './pages/AdminPanel';
+import LearningBench from './pages/LearningBench';
 
 // --- ප්‍රධාන App Component එක ---
 function App() {
@@ -71,9 +72,13 @@ function App() {
     </ProtectedRoute>
   } 
 />
+        <Route 
+  path="/pathway/:id" 
+  element=
+  {<LearningBench />} />
 
 
-        </Routes>
+              </Routes>
       </div>
       
     </div>

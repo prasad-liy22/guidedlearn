@@ -1,129 +1,25 @@
 import { useState, useEffect } from 'react';
-import { collection, getDocs, doc, getDoc } from 'firebase/firestore'; // 💡 doc, getDoc එකතු කළා
+// 💡 අලුතින් query සහ where import කරගත්තා Database එකෙන් හරියටම දත්ත හොයන්න
+import { collection, getDocs, query, where, addDoc } from 'firebase/firestore'; 
 import { db } from '../firebase';
-import { Search, Sparkles, ArrowRight, BookOpen, ExternalLink, Award, FileText, CheckCircle2 } from 'lucide-react'; // 🔔 Icons අලුතින් ගත්තා
+import { Search, Sparkles, ArrowRight, BookOpen, ExternalLink, Award, FileText, CheckCircle2 } from 'lucide-react';
 import toast from 'react-hot-toast';
-
-// --- 💡 Dummy Data structure (අපි Firestore එකෙන් පස්සේ මේ වගේ structure එකක් ගන්නේ) ---
-const mockRoadmap = {
-  "title": "Java Programming",
-  "levels": {
-    "beginner": {
-      "title": "Level 1: Beginner (Core Java)",
-      "iconColor": "text-green-400",
-      "description": "Mastering the foundational concepts of Java, syntax, and basic Object-Oriented logic.",
-      "topics": [
-        "Java Setup & Environment (JDK, IDE)",
-        "Variables, Data Types & Operators",
-        "Control Flow (If/Else, Switch, For/While Loops)",
-        "Arrays & Strings Management",
-        "Basic OOP (Classes, Objects, Methods)"
-      ],
-      "certs": [
-        { 
-          "name": "HackerRank Java Basic Certificate", 
-          "link": "https://www.hackerrank.com/skills-verification/java_basic" 
-        },
-        { 
-          "name": "SoloLearn Java Course", 
-          "link": "https://www.sololearn.com/learning/1068" 
-        }
-      ],
-      "resources": [
-        { 
-          "name": "Java Tutorial for Beginners (Programming with Mosh)", 
-          "link": "https://www.youtube.com/watch?v=eIrMbAQSU34" 
-        },
-        { 
-          "name": "W3Schools Java Tutorial", 
-          "link": "https://www.w3schools.com/java/" 
-        }
-      ]
-    },
-    "intermediate": {
-      "title": "Level 2: Intermediate (Advanced OOP)",
-      "iconColor": "text-yellow-400",
-      "description": "Deep dive into the Java Collections framework, functional programming, and data handling.",
-      "topics": [
-        "Advanced OOP (Inheritance, Polymorphism, Abstraction)",
-        "Exception Handling & Debugging",
-        "Java Collections Framework (List, Set, Map, Queue)",
-        "Generics & Wrapper Classes",
-        "Java 8 Features (Lambda Expressions, Streams API)",
-        "File I/O & Serialization"
-      ],
-      "certs": [
-        { 
-          "name": "Oracle Certified Associate, Java SE 8 (OCA)", 
-          "link": "https://education.oracle.com/java-se-8-programmer-i/pexam_1Z0-808" 
-        },
-        { 
-          "name": "Coursera: Object Oriented Programming in Java", 
-          "link": "https://www.coursera.org/learn/object-oriented-java" 
-        }
-      ],
-      "resources": [
-        { 
-          "name": "Java Collections Framework (Amigoscode)", 
-          "link": "https://www.youtube.com/watch?v=Vi91qyjukRQ" 
-        },
-        { 
-          "name": "Baeldung - Java Collections", 
-          "link": "https://www.baeldung.com/java-collections" 
-        }
-      ]
-    },
-    "advanced": {
-      "title": "Level 3: Advanced (Enterprise & Web)",
-      "iconColor": "text-red-400",
-      "description": "Mastering multithreading, enterprise frameworks like Spring Boot, and building APIs.",
-      "topics": [
-        "Multithreading & Concurrency",
-        "JDBC & Database Connectivity",
-        "Java Persistence API (JPA) & Hibernate",
-        "Spring Core & Dependency Injection",
-        "Building RESTful APIs with Spring Boot",
-        "Microservices Architecture Basics",
-        "Testing (JUnit & Mockito)"
-      ],
-      "certs": [
-        { 
-          "name": "Spring Professional Certification", 
-          "link": "https://spring.academy/learning-path" 
-        },
-        { 
-          "name": "Udemy: Java Spring Boot Microservices", 
-          "link": "https://www.udemy.com/course/microservices-with-spring-boot-and-spring-cloud/" 
-        }
-      ],
-      "resources": [
-        { 
-          "name": "Spring Boot Full Course (Amigoscode)", 
-          "link": "https://www.youtube.com/watch?v=9SGDpanrc8U" 
-        },
-        { 
-          "name": "Spring Official Guides", 
-          "link": "https://spring.io/guides" 
-        },
-        { 
-          "name": "Java Concurrency / Multithreading Guide", 
-          "link": "https://www.baeldung.com/java-concurrency" 
-        }
-      ]
-    }
-  }
-}
+import { useAuth } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
+import { serverTimestamp } from 'firebase/firestore';
 
 export default function RoadmapMaker() {
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [popularTopics, setPopularTopics] = useState([]);
   const [filteredTopics, setFilteredTopics] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedRoadmap, setSelectedRoadmap] = useState(null); 
+  const [isGenerating, setIsGenerating] = useState(false); 
   
-  // --- 💡 අලුත් States ---
-  const [selectedRoadmap, setSelectedRoadmap] = useState(null); // තේරූ Roadmap data තියාගන්න
-  const [isGenerating, setIsGenerating] = useState(false); // Loading animation එකට
 
+  // 1. Page එක Load වෙද්දී Topics ටික ගන්නවා (Suggestions වලට)
   useEffect(() => {
     const fetchTopics = async () => {
       try {
@@ -145,7 +41,7 @@ export default function RoadmapMaker() {
   const handleSearchChange = (e) => {
     const value = e.target.value;
     setSearchTerm(value);
-    setSelectedRoadmap(null); // අලුතින් search කරනකොට පරණ එක වහනවා
+    setSelectedRoadmap(null); 
 
     if (value.trim() === '') {
       setFilteredTopics([]);
@@ -160,31 +56,149 @@ export default function RoadmapMaker() {
   const handleSelectTopic = (topic) => {
     setSearchTerm(topic);
     setFilteredTopics([]); 
-    setSelectedRoadmap(null); // reset old view
+    setSelectedRoadmap(null); 
   };
 
-  // --- 💡 Generate Button Logic (දැනට Dummy Data පෙන්වනවා) ---
-  const handleGenerate = () => {
+  // --- 💡 අලුත් Generate Button Logic එක (Real Database Connection) ---
+  const handleGenerate = async () => {
     if (!searchTerm.trim()) {
-      toast.error("Please enter a topic!");
-      return;
+      return toast.error("Please enter a topic!");
     }
     
     setIsGenerating(true);
     setSelectedRoadmap(null);
-    toast.success(`Looking for data: ${searchTerm}...`, { icon: '🔍', style: { background: '#1e293b', color: '#fff' } });
+    const loadingToastId = toast.loading(`Searching database for: ${searchTerm}...`, { style: { background: '#1e293b', color: '#fff' } });
     
-    // Simulate AI or DB fetch time (තත්පර 1.5ක්)
-    setTimeout(() => {
-      // අපි Java Programming කියලා සෙව්වොත් විතරක් Mock data පෙන්වමු
-      if (searchTerm.toLowerCase().includes("java programm")) {
-         setSelectedRoadmap(mockRoadmap);
-         toast.success("Roadmap loaded from our Database!", { icon: '✅', style: { background: '#1e293b', color: '#fff' } });
-      } else {
-         toast.error("AI Generation isn't connected yet! Try searching 'Java Programming' to see a demo.");
+    try {
+      // 💡 1. User ගහපු එක Database එකට ගැලපෙන්න සම්පූර්ණයෙන්ම Simple (lowercase) කරනවා.
+      const normalizedSearchTerm = searchTerm.toLowerCase().trim();
+
+      // 💡 2. අපි දැන් හොයන්නේ 'title' එකෙන් නෙවෙයි, 'searchId' කියන Simple කරපු Field එකෙන්!
+      const q = query(collection(db, 'popular_topics'), where('searchId', '==', normalizedSearchTerm));
+      const querySnapshot = await getDocs(q);
+
+      if (!querySnapshot.empty) {
+        const roadmapData = querySnapshot.docs[0].data();
+        setSelectedRoadmap(roadmapData);
+        toast.success("Roadmap loaded instantly from Database!", { id: loadingToastId, icon: '⚡' });
+        setIsGenerating(false);
+        return; 
       }
+
+      // Database එකේ නැත්නම් AI එකෙන් හදනවා
+      toast.loading(`Generating new roadmap for "${searchTerm}"...`, { id: loadingToastId });
+      const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+      if (!apiKey) throw new Error("Gemini API Key is missing!");
+
+      // 💡 3. Prompt එක වෙනස් කළා! 'officialTitle' කියලා අලුත් කෑල්ලක් ඉල්ලනවා Typo එක හදලා එවන්න.
+      const prompt = `
+        You are an expert educational roadmap creator. Create a comprehensive learning roadmap for the topic: "${searchTerm}".
+        Fix any spelling mistakes or typos in the topic name and provide the correct, professional title.
+        You MUST respond strictly with a valid JSON object and nothing else. Do not include markdown tags.
+        
+        CRITICAL RULES:
+        1. EXACT KEYS: Use EXACTLY "beginner", "intermediate", and "advanced".
+        2. WORD LIMIT: "description" MUST be strictly LESS THAN 20 words.
+        3. TOPICS LIMIT: MAXIMUM 5 topics per level.
+        4. MINIMUMS: At LEAST 2 certs and 2 resources per level. Use real, high-quality links.
+
+        Use this EXACT JSON structure:
+        {
+          "officialTitle": "Corrected and Capitalized Title (e.g., Machine Learning)",
+          "levels": {
+            "beginner": {
+              "title": "Level 1: Beginner",
+              "description": "Short description strictly under 20 words.",
+              "topics": ["Topic 1", "Topic 2"],
+              "certs": [{"name": "Cert", "link": "https://..."}],
+              "resources": [{"name": "Resource", "link": "https://..."}]
+            },
+            "intermediate": {
+              "title": "Level 2: Intermediate",
+              "description": "...",
+              "topics": ["..."],
+              "certs": [],
+              "resources": []
+            },
+            "advanced": {
+              "title": "Level 3: Advanced",
+              "description": "...",
+              "topics": ["..."],
+              "certs": [],
+              "resources": []
+            }
+          }
+        }
+      `;
+
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: { temperature: 0.2 }
+        })
+      });
+
+      const aiData = await response.json();
+      if (!response.ok) throw new Error("AI Generation Failed");
+
+      let responseText = aiData.candidates[0].content.parts[0].text;
+      responseText = responseText.replace(/```json/gi, '').replace(/```/gi, '').trim();
+      const parsedRoadmap = JSON.parse(responseText);
+
+      // 💡 4. AI එක හදපු ලස්සන නම (officialTitle) පාවිච්චි කරනවා
+      const finalTitle = parsedRoadmap.officialTitle || searchTerm;
+
+      // 💡 5. Database එකට Save කරද්දී, 'searchId' කියලත් අලුතින් Field එකක් දානවා! (ඊළඟ කෙනාට ලේසි වෙන්න)
+      await addDoc(collection(db, 'popular_topics'), {
+        title: finalTitle,
+        searchId: finalTitle.toLowerCase().trim(), // "Machine Learning" -> "machine learning"
+        levels: parsedRoadmap.levels
+      });
+
+      // UI එකට දෙනවා
+      setSelectedRoadmap({ title: finalTitle, levels: parsedRoadmap.levels });
+      // Search Bar එකේ නමත් අර නිවැරදි කරපු නමට ඉබේම මාරු කරනවා
+      setSearchTerm(finalTitle); 
+      
+      toast.success("AI Roadmap Generated & Saved!", { id: loadingToastId, icon: '🤖' });
+
+    } catch (error) {
+      console.error("Roadmap Generation Error:", error);
+      toast.error("Failed to generate roadmap. Please try a different topic.", { id: loadingToastId });
+    } finally {
       setIsGenerating(false);
-    }, 1500);
+    }
+  };
+
+  // --- 🚀 Start Pathway Logic ---
+  const handleStartPathway = async () => {
+    if (!user) {
+      toast.error("Please Sign In to start this pathway!");
+      navigate('/signin');
+      return;
+    }
+
+    const toastId = toast.loading("Adding to your Dashboard...", { style: { background: '#1e293b', color: '#fff' } });
+    
+    try {
+      // 💡 User ගේ Document එක ඇතුළේ 'my_pathways' කියලා collection එකකට Save කරනවා
+      const myPathwaysRef = collection(db, 'users', user.uid, 'my_pathways');
+      await addDoc(myPathwaysRef, {
+        title: selectedRoadmap.title,
+        levels: selectedRoadmap.levels,
+        progress: 0, // ආරම්භක Progress එක 0%
+        enrolledAt: serverTimestamp()
+      });
+
+      toast.success("Pathway started successfully!", { id: toastId, icon: '🚀' });
+      // තත්පර 1.5කින් Dashboard එකට ඉබේම යවනවා
+      setTimeout(() => navigate('/dashboard'), 1500); 
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to start pathway.", { id: toastId });
+    }
   };
 
   return (
@@ -194,7 +208,7 @@ export default function RoadmapMaker() {
       <div className="absolute top-10 left-1/4 w-72 h-72 bg-cyan-500/10 rounded-full blur-[100px] -z-10"></div>
       <div className="absolute bottom-10 right-1/4 w-96 h-96 bg-blue-600/10 rounded-full blur-[120px] -z-10"></div>
 
-      {/* --- Header Section (Only show if roadmap is not generated) --- */}
+      {/* Header Section */}
       {!selectedRoadmap && !isGenerating && (
          <div className="text-center mb-12 animate-in fade-in duration-500">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-sm font-bold mb-6">
@@ -210,7 +224,7 @@ export default function RoadmapMaker() {
          </div>
       )}
 
-      {/* --- Search Box Area --- */}
+      {/* Search Box Area */}
       <div className={`max-w-3xl mx-auto relative z-20 transition-all duration-500 ${selectedRoadmap || isGenerating ? 'mb-12' : 'mb-12'}`}>
         <div className="relative group">
           <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
@@ -238,7 +252,7 @@ export default function RoadmapMaker() {
           </button>
         </div>
 
-        {/* --- Autocomplete Dropdown --- */}
+        {/* Autocomplete Dropdown */}
         {filteredTopics.length > 0 && (
           <div className="absolute top-full left-0 right-0 mt-2 bg-slate-800/95 backdrop-blur-xl border border-slate-700 rounded-xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] z-50 animate-in fade-in slide-in-from-top-2">
             {filteredTopics.map((topic, index) => (
@@ -255,7 +269,7 @@ export default function RoadmapMaker() {
         )}
       </div>
 
-      {/* --- 💡 Roadmap Display Area --- */}
+      {/* Loading State */}
       {isGenerating && (
          <div className="max-w-5xl mx-auto text-center py-10 animate-pulse">
             <h2 className="text-xl font-bold text-slate-400">Our AI is mapping your future...</h2>
@@ -263,42 +277,46 @@ export default function RoadmapMaker() {
          </div>
       )}
 
+      {/* Roadmap Display Area */}
       {selectedRoadmap && (
          <div className="max-w-7xl mx-auto space-y-8 animate-in fade-in duration-500">
             <div className="flex items-center gap-4 mb-6 pb-6 border-b border-slate-700/50">
                <h2 className="text-3xl md:text-4xl font-black text-white"> <span className="text-cyan-400">AI</span> Roadmap for: <span className="underline decoration-blue-500">{selectedRoadmap.title}</span></h2>
             </div>
 
-            {/* Beginner, Intermediate, Advanced Cards Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 relative">
-               {/* Background Line for flow */}
-               <div className="hidden lg:block absolute top-1/2 left-0 right-0 h-1 bg-linear-to-r from-green-500/20 via-yellow-500/20 to-red-500/20 -translate-y-1/2 -z-10 rounded-full"></div>
+               <div className="hidden lg:block absolute top-1/2 left-0 right-0 h-1 bg-gradient-to-r from-green-500/20 via-yellow-500/20 to-red-500/20 -translate-y-1/2 -z-10 rounded-full"></div>
                
-               {Object.keys(selectedRoadmap.levels).map(levelKey => {
-                  const level = selectedRoadmap.levels[levelKey];
+               {['beginner', 'intermediate', 'advanced'].map(levelKey => {
+                  const level = selectedRoadmap.levels?.[levelKey];
+                  if (!level) return null; // Error Handling
+                  
+                  // Color Mapping Based on Level
+                  const iconColor = levelKey === 'beginner' ? 'text-green-400' : levelKey === 'intermediate' ? 'text-yellow-400' : 'text-red-400';
+
                   return (
                      <div key={levelKey} className="bg-slate-900/50 backdrop-blur-xl border border-slate-700/50 rounded-3xl p-6 lg:p-8 shadow-xl flex flex-col hover:border-cyan-500/30 transition-all hover:-translate-y-1 hover:shadow-cyan-500/5">
                         
                         {/* Header */}
-                        <div className={`inline-flex items-center gap-2 font-black text-2xl ${level.iconColor} mb-3`}>
+                        <div className={`inline-flex items-center gap-2 font-black text-2xl ${iconColor} mb-3`}>
                            <CheckCircle2 className="w-7 h-7" />
-                           {level.title}
+                           {level.title || `Level: ${levelKey}`}
                         </div>
                         <p className="text-slate-400 text-sm mb-6 pb-5 border-b border-slate-700/50">{level.description}</p>
                         
-                        {/* Topics Section */}
+                        {/* Topics */}
                         <div className="flex-grow space-y-3 mb-8">
                            <h4 className="text-slate-200 text-base font-bold flex items-center gap-2"> <FileText className="w-4 h-4 text-cyan-400"/> Key Topics</h4>
                            <ul className="space-y-2.5">
-                              {level.topics.map((topic, i) => (
+                              {level.topics?.map((topic, i) => (
                                  <li key={i} className="text-slate-300 text-sm flex items-center gap-2 bg-slate-800/50 px-3 py-2 rounded-lg"> <span className="w-1.5 h-1.5 rounded-full bg-cyan-600"></span> {topic}</li>
                               ))}
                            </ul>
                         </div>
 
-                        {/* Resources Section */}
+                        {/* Resources & Certs */}
                         <div className="space-y-4 pt-5 border-t border-slate-700/50 mt-auto">
-                           {level.certs && (
+                           {level.certs && level.certs.length > 0 && (
                               <div>
                                  <h4 className="text-white text-sm font-bold flex items-center gap-2 mb-2"> <Award className="w-4 h-4 text-yellow-400"/> Certifications</h4>
                                  {level.certs.map((cert, i) => (
@@ -306,9 +324,9 @@ export default function RoadmapMaker() {
                                  ))}
                               </div>
                            )}
-                           {level.resources && (
+                           {level.resources && level.resources.length > 0 && (
                               <div>
-                                 <h4 className="text-white text-sm font-bold flex items-center gap-2 mb-2 mb-2"> <BookOpen className="w-4 h-4 text-blue-400"/> Free Resources</h4>
+                                 <h4 className="text-white text-sm font-bold flex items-center gap-2 mb-2"> <BookOpen className="w-4 h-4 text-blue-400"/> Free Resources</h4>
                                  {level.resources.map((res, i) => (
                                     <a key={i} href={res.link} target="_blank" rel="noopener noreferrer" className="text-blue-400 text-xs flex items-center gap-1.5 hover:text-blue-300 transition-colors"> <ExternalLink className="w-3 h-3"/> {res.name}</a>
                                  ))}
@@ -320,15 +338,26 @@ export default function RoadmapMaker() {
                   );
                })}
             </div>
+
+            <div className="mt-12 text-center animate-in slide-in-from-bottom-5 duration-700 delay-300">
+               <button 
+                  onClick={handleStartPathway}
+                  className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-black text-xl px-12 py-5 rounded-2xl shadow-[0_0_40px_rgba(6,182,212,0.4)] hover:scale-105 transition-all flex items-center gap-3 mx-auto mouse-pointer"
+               >
+                  <Sparkles className="w-6 h-6" />
+                  Start This Pathway Now
+               </button>
+               <p className="text-slate-400 text-sm mt-4 font-medium">This will be permanently added to your Dashboard.</p>
+            </div>
          </div>
       )}
 
-      {/* --- Popular Suggestions (Only show if roadmap is not generated) --- */}
+      {/* Popular Suggestions */}
       {!selectedRoadmap && !isGenerating && (
          <div className="max-w-3xl mx-auto mt-12 animate-in fade-in duration-500 delay-100">
             <div className="flex items-center gap-2 text-slate-400 text-sm font-semibold mb-4 ml-1">
                <BookOpen className="w-4 h-4" />
-               Popular Topics (Demo: 'Java Programming')
+               Popular Topics
             </div>
             
             {isLoading ? (
@@ -349,7 +378,10 @@ export default function RoadmapMaker() {
                </div>
             )}
          </div>
+         
       )}
+
+      
 
     </div>
   );
