@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { ArrowLeft, BrainCircuit } from 'lucide-react'; 
 import { auth, db } from '../firebase'; // ඔයාගේ firebase.js තියෙන තැන අනුව path එක හදන්න
-import { createUserWithEmailAndPassword, sendEmailVerification } from 'firebase/auth';
+import { createUserWithEmailAndPassword, sendEmailVerification, updateProfile, signOut } from 'firebase/auth';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { useAuth } from '../context/AuthContext';
 
@@ -86,6 +86,8 @@ export default function SignUp() {
         createdAt: serverTimestamp(),
         role: 'student'
       });
+
+      await signOut(auth);
 
       toast.dismiss(loadingToast);
       toast.success('Account created successfully!', { style: toastStyle });

@@ -11,6 +11,7 @@ import SignUp from './pages/SignUp';
 import EmailVerification from './pages/EmailVerification';
 import ProtectedRoute from './components/ProtectedRoute';
 import Dashboard from './pages/Dashboard';
+import AdminPanel from './pages/AdminPanel';
 
 // --- ප්‍රධාන App Component එක ---
 function App() {
@@ -59,6 +60,14 @@ function App() {
   element={
     <ProtectedRoute>
       <Dashboard />
+    </ProtectedRoute>
+  } 
+/>
+        <Route 
+  path="/admin" 
+  element={
+    <ProtectedRoute>
+      <AdminPanel />
     </ProtectedRoute>
   } 
 />
