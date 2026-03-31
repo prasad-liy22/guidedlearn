@@ -1,7 +1,7 @@
 import { ChevronLeft, ChevronRight, CheckCircle } from 'lucide-react';
 
 export default function PathwayNavigation({ 
-  currentLevelKey, // 💡 අලුතින් ගත්ත Prop එක (beginner, intermediate, advanced)
+  currentLevelKey, 
   currentLevelTitle, 
   currentTopic, 
   onNext, 
@@ -13,7 +13,6 @@ export default function PathwayNavigation({
 }) {
 
   // --- 🚀 Dynamic Color Logic ---
-  // Default පාට (නිල්)
   let theme = { text: 'text-cyan-400', bg: 'bg-cyan-500/10', bar: 'from-cyan-400 to-blue-500' };
 
   if (currentLevelKey === 'beginner') {
@@ -25,42 +24,38 @@ export default function PathwayNavigation({
   }
 
   return (
-    <div className="bg-slate-900/60 backdrop-blur-xl border border-slate-700/50 rounded-3xl p-4 md:p-6 shadow-lg flex flex-col md:flex-row items-center justify-between gap-6 mt-6 animate-in slide-in-from-bottom-5 duration-500">
+    <div className="bg-slate-900/60 backdrop-blur-xl border border-slate-700/50 rounded-2xl md:rounded-3xl p-4 sm:p-5 md:p-6 shadow-lg grid grid-cols-2 md:flex md:flex-row items-center justify-between gap-4 md:gap-6 mt-6 animate-in slide-in-from-bottom-5 duration-500">
       
       {/* ⬅️ Back Button */}
       <button 
         onClick={onPrev} 
         disabled={isFirst}
-        className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl font-bold transition-all w-full md:w-auto text-sm ${
+        className={`col-span-1 flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-3 sm:py-2.5 rounded-xl font-bold transition-all w-full md:w-auto text-xs sm:text-sm active:scale-95 ${
           isFirst 
             ? 'bg-slate-800/50 text-slate-600 cursor-not-allowed border border-slate-800' 
             : 'bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 hover:-translate-x-1'
         }`}
       >
-        <ChevronLeft className="w-5 h-5" /> Previous
+        <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" /> Prev
       </button>
-
-      {/* 📍 Current Step Info */}
-      <div className="flex flex-col items-center text-center w-full md:w-auto flex-1 px-4">
-         {/* 💡 Dynamic Badge Color */}
+      <div className="col-span-2 order-first md:order-none flex flex-col items-center text-center w-full flex-1 px-2 md:px-4 mb-2 md:mb-0">
          <span className={`${theme.text} ${theme.bg} text-[10px] md:text-xs font-black uppercase tracking-widest mb-2 px-3 py-1 rounded-full transition-colors duration-500`}>
            {currentLevelTitle}
          </span>
          
-         {/* 💡 Font size එක පොඩි කළා, line-clamp-2 දැම්මා දිග මාතෘකා වලට */}
-         <h3 className="text-white font-bold text-base md:text-lg leading-snug line-clamp-2 max-w-lg transition-all duration-300">
+         <h3 className="text-white font-bold text-sm sm:text-base md:text-lg leading-snug line-clamp-2 max-w-lg transition-all duration-300">
            {currentTopic}
          </h3>
          
-         {/* 💡 Dynamic Progress Bar Color */}
-         <div className="flex items-center gap-3 mt-3">
-            <div className="w-32 md:w-48 h-1.5 bg-slate-800 rounded-full overflow-hidden">
+         <div className="flex items-center justify-center gap-3 mt-3 w-full">
+
+            <div className="w-full max-w-[160px] sm:max-w-[200px] md:w-48 h-1.5 bg-slate-800 rounded-full overflow-hidden shrink-0">
                <div 
                  className={`h-full bg-gradient-to-r ${theme.bar} rounded-full transition-all duration-700 ease-out`}
                  style={{ width: `${(currentStepNum / totalSteps) * 100}%` }}
                ></div>
             </div>
-            <span className="text-slate-400 text-xs font-bold">{currentStepNum} / {totalSteps}</span>
+            <span className="text-slate-400 text-[10px] sm:text-xs font-bold whitespace-nowrap">{currentStepNum} / {totalSteps}</span>
          </div>
       </div>
 
@@ -68,16 +63,17 @@ export default function PathwayNavigation({
       <button 
         onClick={onNext} 
         disabled={isLast}
-        className={`flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-bold transition-all w-full md:w-auto text-sm ${
+        // 💡 Mobile වල text-xs සහ padding වෙනස් කළා
+        className={`col-span-1 flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-3 sm:py-2.5 rounded-xl font-bold transition-all w-full md:w-auto text-xs sm:text-sm active:scale-95 ${
           isLast 
             ? 'bg-green-500/20 text-green-400 border border-green-500/30' 
             : `bg-gradient-to-r ${theme.bar} text-white hover:scale-105 hover:shadow-lg`
         }`}
       >
         {isLast ? (
-          <><CheckCircle className="w-5 h-5" /> Finish Pathway</>
+          <><CheckCircle className="w-4 h-4 sm:w-5 sm:h-5" /> Finish</>
         ) : (
-          <>Next Topic <ChevronRight className="w-5 h-5" /></>
+          <>Next <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" /></>
         )}
       </button>
 

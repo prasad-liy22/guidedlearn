@@ -1,10 +1,11 @@
 import { Routes, Route, useLocation } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
+import ScrollToTop from './components/ScrollToTop';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Home from './pages/Home';
 import CoursesPage from './pages/course';
-import RoadmapMaker from './pages/roadmapMaker';
+import RoadmapMaker from './pages/RoadmapMaker';
 import Blogs from './pages/Blogs';
 import Tools from './pages/Tools';
 import SignIn from './pages/SignIn';
@@ -19,24 +20,25 @@ import CreateBlog from './pages/CreateBlog';
 import BlogEditor from './pages/BlogEditor';
 import BlogView from './pages/BlogView';
 import Profile from './pages/Profile';
+import TermsOfService from './pages/TermsOfService';
+import HelpCenter from './pages/HelpCenter';
+import CommunityGuidelines from './pages/CommunityGuidelines';
+import PrivacyPolicy from './pages/PrivacyPolicy';
 
-// --- ප්‍රධාන App Component එක ---
 function App() {
-  const location = useLocation(); // දැනට ඉන්න පිටුව හොයාගන්නවා
+  const location = useLocation();
 
-  // Navbar එක හැංගිය යුතු පිටු ලැයිස්තුව
   const hideNavbarRoutes = ['/signin', '/signup', '/verify-email'];
   const shouldHideNavbar = hideNavbarRoutes.includes(location.pathname);
 
   return (
     <div className="min-h-screen w-full bg-linear-to-br from-slate-950 via-slate-900 to-cyan-950 font-sans text-slate-100">
 
-      {/* 🔔 මේක දැම්මම මුළු App එකේම ඕනේ තැනක ඉඳන් Notifications පෙන්වන්න පුළුවන් */}
       <Toaster position="top-right" reverseOrder={false} />
-
-      {/* shouldHideNavbar එක බොරු (false) නම් විතරක් Navbar එක පෙන්වන්න */}
+      
       {!shouldHideNavbar && <Navbar />}
 
+          <ScrollToTop />
       <div className={shouldHideNavbar ? "" : "pb-12"}>
         <Routes>
           <Route path="/" element={<Home />} />
@@ -45,7 +47,10 @@ function App() {
           <Route path="/signin" element={<SignIn />} />
           <Route path="/signup" element={<SignUp />} />
           <Route path="/verify-email" element={<EmailVerification />} />
-          {/* 🔒 ලොග් වුණු අයට විතරක් පේන පිටු (Protected Routes) */}
+          <Route path="/terms-of-service" element={<TermsOfService />} />
+          <Route path="/help-center" element={<HelpCenter />} />
+          <Route path="/community-guide-lines" element={<CommunityGuidelines />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route
             path="/roadmap"
             element={

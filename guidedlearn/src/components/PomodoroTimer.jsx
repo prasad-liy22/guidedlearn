@@ -2,9 +2,9 @@ import { useState, useEffect } from 'react';
 import { Play, Pause, RotateCcw, BrainCircuit, Coffee, Zap } from 'lucide-react';
 
 const TEMPLATES = {
-  classic: { name: 'Classic', work: 25, break: 5, icon: BrainCircuit, color: 'from-cyan-400 to-blue-500', shadow: 'shadow-cyan-500/50' },
-  deep: { name: 'Deep Work', work: 50, break: 10, icon: Zap, color: 'from-purple-400 to-indigo-500', shadow: 'shadow-purple-500/50' },
-  quick: { name: 'Quick', work: 15, break: 3, icon: Coffee, color: 'from-emerald-400 to-green-500', shadow: 'shadow-emerald-500/50' }
+  classic: { name: 'Classic', work: 25, break: 5, icon: BrainCircuit, color: 'from-cyan-400 to-blue-500', shadow: 'shadow-cyan-500/50', badgeColor: 'text-cyan-400 bg-cyan-500/10 border-cyan-500/20' },
+  deep: { name: 'Deep Work', work: 50, break: 10, icon: Zap, color: 'from-purple-400 to-indigo-500', shadow: 'shadow-purple-500/50', badgeColor: 'text-purple-400 bg-purple-500/10 border-purple-500/20' },
+  quick: { name: 'Quick', work: 15, break: 3, icon: Coffee, color: 'from-emerald-400 to-green-500', shadow: 'shadow-emerald-500/50', badgeColor: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' }
 };
 
 export default function PomodoroTimer() {
@@ -49,28 +49,33 @@ export default function PomodoroTimer() {
 
   const currentTotalSeconds = (mode === 'work' ? TEMPLATES[activeTemplate].work : TEMPLATES[activeTemplate].break) * 60;
   const progressPercentage = ((currentTotalSeconds - timeLeft) / currentTotalSeconds) * 100;
-  const circleRadius = 65;
+  
+  // 💡 SVG viewBox setup
+  const circleRadius = 45;
   const circleCircumference = 2 * Math.PI * circleRadius;
   const strokeDashoffset = circleCircumference - (progressPercentage / 100) * circleCircumference;
   const currentTheme = TEMPLATES[activeTemplate];
 
-  // 💡 මෙතනින් Outer Backgrounds ඔක්කොම අයින් කළා!
   return (
-    <div className="flex flex-col items-center">
+    <div className="flex flex-col items-center w-full px-2">
       
       {/* Mode Status */}
-      <span className={`px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest mb-6 shadow-sm ${mode === 'work' ? `bg-${currentTheme.color.split('-')[1]}-500/20 text-${currentTheme.color.split('-')[1]}-400 border border-${currentTheme.color.split('-')[1]}-500/30` : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'}`}>
+      <span className={`mt-5 px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest mb-6 sm:mb-8 shadow-sm border ${mode === 'work' ? currentTheme.badgeColor : 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20'}`}>
         {mode === 'work' ? '🚀 Focus Time' : '☕ Break Time'}
       </span>
 
       {/* Circular Timer */}
-      <div className="relative flex items-center justify-center mb-8">
-        <svg className="w-40 h-40 transform -rotate-90">
-          <circle cx="80" cy="80" r={circleRadius} stroke="currentColor" strokeWidth="8" fill="transparent" className="text-slate-800" />
+      <div className="relative flex items-center justify-center mb-8 w-48 h-48 sm:w-56 sm:h-56">
+        <svg className="w-full h-full transform -rotate-90 drop-shadow-2xl" viewBox="0 0 100 100">
+          <circle cx="50" cy="50" r={circleRadius} stroke="currentColor" strokeWidth="4" fill="transparent" className="text-slate-800/80" />
           <circle 
-            cx="80" cy="80" r={circleRadius} stroke="url(#gradient)" strokeWidth="8" fill="transparent" strokeLinecap="round"
+            cx="50" cy="50" r={circleRadius} stroke="url(#gradient)" strokeWidth="4" fill="transparent" strokeLinecap="round"
             className="transition-all duration-1000 ease-linear"
-            style={{ strokeDasharray: circleCircumference, strokeDashoffset, filter: `drop-shadow(0 0 8px rgba(${mode === 'work' ? '6,182,212' : '16,185,129'}, 0.5))` }}
+            style={{ 
+              strokeDasharray: circleCircumference, 
+              strokeDashoffset, 
+              filter: `drop-shadow(0 0 4px rgba(${mode === 'work' ? '6,182,212' : '16,185,129'}, 0.4))` 
+            }}
           />
           <defs>
             <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -79,25 +84,37 @@ export default function PomodoroTimer() {
             </linearGradient>
           </defs>
         </svg>
-        <div className="absolute flex flex-col items-center">
-          <span className="text-3xl font-black text-white tracking-wider font-mono">{formatTime(timeLeft)}</span>
+        <div className="absolute flex flex-col items-center justify-center inset-0">
+          <span className="text-4xl sm:text-5xl font-black text-white tracking-wider font-mono drop-shadow-lg">
+            {formatTime(timeLeft)}
+          </span>
         </div>
       </div>
 
       {/* Controls */}
-      <div className="flex items-center gap-4 mb-6">
-        <button onClick={() => setIsActive(!isActive)} className={`flex items-center justify-center w-14 h-14 rounded-full text-white transition-all transform hover:scale-110 shadow-lg ${isActive ? 'bg-slate-700 hover:bg-slate-600' : `bg-gradient-to-r ${currentTheme.color} hover:${currentTheme.shadow}`}`}>
-          {isActive ? <Pause className="w-6 h-6" fill="currentColor" /> : <Play className="w-6 h-6 ml-1" fill="currentColor" />}
+      <div className="flex items-center gap-5 sm:gap-6 mb-8">
+        <button 
+          onClick={resetTimer} 
+          className="flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors border border-slate-700 active:scale-95"
+        >
+          <RotateCcw className="w-5 h-5 sm:w-6 sm:h-6" />
         </button>
-        <button onClick={resetTimer} className="flex items-center justify-center w-12 h-12 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors border border-slate-700">
-          <RotateCcw className="w-5 h-5" />
+        <button 
+          onClick={() => setIsActive(!isActive)} 
+          className={`flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 rounded-full text-white transition-all transform active:scale-95 shadow-xl ${isActive ? 'bg-slate-800 border-2 border-slate-700 hover:bg-slate-700' : `bg-gradient-to-br ${currentTheme.color} hover:scale-105 hover:${currentTheme.shadow}`}`}
+        >
+          {isActive ? <Pause className="w-8 h-8 sm:w-10 sm:h-10" fill="currentColor" /> : <Play className="w-8 h-8 sm:w-10 sm:h-10 ml-1" fill="currentColor" />}
         </button>
       </div>
 
       {/* Templates */}
-      <div className="w-full bg-slate-950/50 p-1.5 rounded-2xl flex border border-slate-800/50">
+      <div className="w-full max-w-[300px] bg-slate-950/80 p-1.5 rounded-2xl flex border border-slate-800/80 shadow-inner mt-auto">
         {Object.entries(TEMPLATES).map(([key, temp]) => (
-          <button key={key} onClick={() => handleTemplateChange(key)} className={`flex-1 py-2 text-[11px] font-bold rounded-xl transition-all ${activeTemplate === key ? 'bg-slate-800 text-white shadow-md' : 'text-slate-500 hover:text-slate-300'}`}>
+          <button 
+            key={key} 
+            onClick={() => handleTemplateChange(key)} 
+            className={`flex-1 py-2.5 sm:py-2 px-1 text-[11px] sm:text-xs font-bold rounded-xl transition-all ${activeTemplate === key ? 'bg-slate-800 text-white shadow-md border border-slate-700' : 'text-slate-500 hover:text-slate-300 hover:bg-slate-900/50'}`}
+          >
             {temp.name}
           </button>
         ))}

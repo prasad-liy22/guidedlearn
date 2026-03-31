@@ -15,10 +15,9 @@ const firebaseConfig = {
   measurementId: "G-L6ZW59TSGL"
 };
 
-// Firebase initialize කිරීම
+
 const app = initializeApp(firebaseConfig);
 
-// අපිට පස්සේ පාවිච්චි කරන්න ඕනේ වෙන කොටස් Export කරනවා
 export const functions = getFunctions(app);
 export const auth = getAuth(app);
 export const db = getFirestore(app);

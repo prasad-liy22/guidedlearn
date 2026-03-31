@@ -86,7 +86,7 @@ exports.generateRoadmap = onCall({
   if (!searchTerm) throw new HttpsError("invalid-argument", "Topic is required");
 
   const genAI = new GoogleGenerativeAI(geminiKey.value());
-  const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" }); // 💡 2026 ට ගැලපෙන අලුත් මොඩල් එක
+  const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
   const prompt = `
     You are an expert educational roadmap creator. Create a comprehensive learning roadmap for the topic: "${searchTerm}".
@@ -173,7 +173,6 @@ exports.fetchYouTubeVideo = onCall({
   const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=1&q=${query}&type=video&key=${youtubeKey.value()}`;
 
   try {
-    // Node.js 18+ වල native fetch වැඩ කරනවා
     const response = await fetch(url);
     const data = await response.json();
     

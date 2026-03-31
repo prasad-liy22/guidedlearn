@@ -17,18 +17,16 @@ import {
 const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null); // Firebase Auth එකේ විස්තර
-  const [userData, setUserData] = useState(null); // 💡 Firestore Database එකේ විස්තර (Role එක වගේ)
+  const [user, setUser] = useState(null);
+  const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // 1. Firebase එකෙන් බලනවා කවුරුහරි ලොග් වෙලා ඉන්නවද කියලා
+
     const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
       
       if (currentUser) {
-        // 2. ලොග් වෙලා ඉන්නවා නම්, 💡 onSnapshot හරහා Real-time එයාගේ දත්ත ගන්නවා
-        // මේකෙන් වෙන්නේ User ගේ Role එක මාරු කරපු ගමන් Page එක Refresh කරන්නේ නැතුව ඉබේම Update වෙන එකයි!
         const userRef = doc(db, "users", currentUser.uid);
         const unsubscribeDoc = onSnapshot(userRef, (docSnap) => {
           if (docSnap.exists()) {
@@ -37,7 +35,7 @@ export function AuthProvider({ children }) {
           setLoading(false);
         });
         
-        return () => unsubscribeDoc(); // Cleanup function
+        return () => unsubscribeDoc();
       } else {
         setUserData(null);
         setLoading(false);
@@ -53,7 +51,6 @@ export function AuthProvider({ children }) {
       const result = await signInWithPopup(auth, provider);
       const loggedInUser = result.user;
 
-      // 💡 ලොග් වුණු User අලුත් කෙනෙක් නම් විතරක් Firestore එකේ දත්ත සේව් කරනවා
       const userDocRef = doc(db, "users", loggedInUser.uid);
       const userDocSnap = await getDoc(userDocRef);
       
@@ -62,9 +59,9 @@ export function AuthProvider({ children }) {
           uid: loggedInUser.uid,
           fullName: loggedInUser.displayName,
           email: loggedInUser.email,
-          profilePic: loggedInUser.photoURL, // Google Profile Picture එක ගන්නවා
+          profilePic: loggedInUser.photoURL, 
           createdAt: serverTimestamp(),
-          role: "student" // 💡 අලුත් කෙනෙක් ආවම Default Role එක "student" වෙනවා
+          role: "student"
         });
       }
       return loggedInUser;
@@ -77,7 +74,6 @@ export function AuthProvider({ children }) {
   const logout = () => signOut(auth);
 
   return (
-    // 💡 userData එකත් Provider එක හරහා අනිත් පේජ් වලට යවනවා
     <AuthContext.Provider value={{ user, userData, loading, logout, googleSignIn }}>
       {!loading && children}
     </AuthContext.Provider>
