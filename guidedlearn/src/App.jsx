@@ -1,7 +1,8 @@
 import { Routes, Route, useLocation } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
-import Navbar from './components/navBar';
-import Home from './pages/home';
+import Navbar from './components/Navbar';
+import Footer from './components/Footer';
+import Home from './pages/Home';
 import CoursesPage from './pages/course';
 import RoadmapMaker from './pages/roadmapMaker';
 import Blogs from './pages/Blogs';
@@ -13,24 +14,29 @@ import ProtectedRoute from './components/ProtectedRoute';
 import Dashboard from './pages/Dashboard';
 import AdminPanel from './pages/AdminPanel';
 import LearningBench from './pages/LearningBench';
+import CreatorRegistration from './pages/CreatorRegistration';
+import CreateBlog from './pages/CreateBlog';
+import BlogEditor from './pages/BlogEditor';
+import BlogView from './pages/BlogView';
+import Profile from './pages/Profile';
 
 // --- ප්‍රධාන App Component එක ---
 function App() {
   const location = useLocation(); // දැනට ඉන්න පිටුව හොයාගන්නවා
-  
+
   // Navbar එක හැංගිය යුතු පිටු ලැයිස්තුව
   const hideNavbarRoutes = ['/signin', '/signup', '/verify-email'];
   const shouldHideNavbar = hideNavbarRoutes.includes(location.pathname);
 
   return (
     <div className="min-h-screen w-full bg-linear-to-br from-slate-950 via-slate-900 to-cyan-950 font-sans text-slate-100">
-      
+
       {/* 🔔 මේක දැම්මම මුළු App එකේම ඕනේ තැනක ඉඳන් Notifications පෙන්වන්න පුළුවන් */}
       <Toaster position="top-right" reverseOrder={false} />
 
       {/* shouldHideNavbar එක බොරු (false) නම් විතරක් Navbar එක පෙන්වන්න */}
       {!shouldHideNavbar && <Navbar />}
-      
+
       <div className={shouldHideNavbar ? "" : "pb-12"}>
         <Routes>
           <Route path="/" element={<Home />} />
@@ -40,49 +46,70 @@ function App() {
           <Route path="/signup" element={<SignUp />} />
           <Route path="/verify-email" element={<EmailVerification />} />
           {/* 🔒 ලොග් වුණු අයට විතරක් පේන පිටු (Protected Routes) */}
-          <Route 
-    path="/roadmap" 
-    element={
-      <ProtectedRoute>
-        <RoadmapMaker />
-      </ProtectedRoute>
-    } 
-  />
-          <Route 
-    path="/tools" 
-    element={
-      <ProtectedRoute>
-        <Tools />
-      </ProtectedRoute>
-    } 
-  />
-          <Route 
-  path="/dashboard" 
-  element={
-    <ProtectedRoute>
-      <Dashboard />
-    </ProtectedRoute>
-  } 
-/>
-        <Route 
-  path="/admin" 
-  element={
-    <ProtectedRoute>
-      <AdminPanel />
-    </ProtectedRoute>
-  } 
-/>
-        <Route 
-  path="/pathway/:id" 
-  element=
-  {<LearningBench />} />
+          <Route
+            path="/roadmap"
+            element={
+              <ProtectedRoute>
+                <RoadmapMaker />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/tools"
+            element={
+              <ProtectedRoute>
+                <Tools />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute>
+                <AdminPanel />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/creator-registration"
+            element={
+              <ProtectedRoute>
+                <CreatorRegistration />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/create-blog"
+            element={
+              <ProtectedRoute>
+                <CreateBlog />
+              </ProtectedRoute>
+            }
+          />
 
+          <Route
+            path="/pathway/:id"
+            element=
+            {<LearningBench />} />
 
-              </Routes>
+          <Route path="/blog-editor" element={<BlogEditor />} />
+          <Route path="/edit-blog/:id" element={<CreateBlog />} />
+          <Route path="/blog/:id" element={<BlogView />} />
+          <Route path="/profile" element={<Profile />} /> 
+
+        </Routes>
       </div>
-      
+      <Footer />
     </div>
   );
-} 
+}
 
 export default App;

@@ -1,14 +1,28 @@
 import { useState, useRef, useEffect } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom'; // 💡 useLocation එක මෙතනට ගත්තා
+import { Link, useNavigate, useLocation } from 'react-router-dom'; 
 import { useAuth } from '../context/AuthContext';
 import { LayoutDashboard, LogOut, User as UserIcon } from 'lucide-react';
 
 function Navbar() {
   const { user, logout } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false); // 💡 අලුත් Scroll State එක
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
   const location = useLocation();
+
+  // Scroll කරනකොට Navbar එකේ පෙනුම වෙනස් කරන Logic එක
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 20) {
+        setIsScrolled(true);
+      } else {
+        setIsScrolled(false);
+      }
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   // Dropdown එකෙන් එළියේ click කළොත් ඒක වහන Logic එක
   useEffect(() => {
@@ -29,23 +43,35 @@ function Navbar() {
   const isLearningBench = location.pathname.includes('/pathway/');
 
   return (
-    // 💡 1. මෙන්න මේ ප්‍රධානම Wrapper එකෙන් තමයි අපි දැන් NavBar එක පාලනය කරන්නේ!
-    // isLearningBench true නම් 'absolute' වෙනවා (එතකොට පල්ලෙහාට එන්නේ නෑ).
-    // නැත්නම් 'sticky top-0' වෙනවා (එතකොට පාවෙවී පල්ලෙහාට එනවා).
-    <div className={`pt-6 px-4 sm:px-6 lg:px-8 w-full z-50 transition-all duration-300 ${isLearningBench ? 'absolute top-0 left-0 right-0' : 'sticky top-0'}`}>
+    // 💡 1. Wrapper එක: Scroll කරාම සම්පූර්ණ පළල අරන් Dark Blur එකක් වැටෙනවා
+    <div 
+      className={`w-full z-50 transition-all duration-300 ${
+        isLearningBench ? 'absolute top-0 left-0 right-0' : 'fixed top-0'
+      } ${
+        isScrolled && !isLearningBench 
+          ? 'bg-[#020617]/80 backdrop-blur-xl border-b border-slate-800 shadow-[0_4px_30px_rgba(0,0,0,0.5)] py-3 px-4 sm:px-6 lg:px-8' 
+          : 'bg-transparent pt-6 px-4 sm:px-6 lg:px-8'
+      }`}
+    >
       
-      {/* 2. ප්‍රධාන Navbar එක (මේකේ තිබ්බ අමතර දේවල් අයින් කළා) */}
-      <nav className="max-w-6xl mx-auto bg-white/5 backdrop-blur-xl border border-white/10 shadow-[0_8px_32px_rgba(6,182,212,0.15)] rounded-2xl px-6 py-3">
+      {/* 💡 2. Inner Navbar: Scroll කරාම මේකේ Border සහ Background අයින් වෙලා Wrapper එකට Merge වෙනවා */}
+      <nav 
+        className={`max-w-6xl mx-auto transition-all duration-300 ${
+          isScrolled && !isLearningBench
+            ? 'px-2 md:px-6 py-1' // Scrolled State
+            : 'bg-white/5 backdrop-blur-xl border border-white/10 shadow-[0_8px_32px_rgba(6,182,212,0.15)] rounded-2xl px-6 py-3' // Floating State
+        }`}
+      >
         <div className="flex justify-between items-center">
           
-          {/* 1. Logo */}
+          {/* Logo */}
           <div className="flex items-center">
-            <Link to="/" className="text-2xl font-extrabold tracking-wide text-transparent bg-clip-text bg-linear-to-r from-cyan-400 to-blue-500 hover:scale-105 transition-transform duration-300 drop-shadow-sm">
+            <Link to="/" className="text-2xl font-extrabold tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500 hover:scale-105 transition-transform duration-300 drop-shadow-sm">
               G-Learn
             </Link>
           </div>
 
-          {/* 2. Main Links */}
+          {/* Main Links */}
           <div className="hidden md:flex items-center space-x-1 lg:space-x-2">
             <Link to="/" className="text-gray-300 hover:text-white hover:bg-white/10 px-3 py-2 lg:px-4 rounded-xl text-sm font-medium transition-all duration-300">
               Home
@@ -61,10 +87,9 @@ function Navbar() {
             </Link>
           </div>
 
-          {/* 3. Auth Section & Dashboard */}
+          {/* Auth Section & Dashboard */}
           <div className="flex items-center space-x-3 sm:space-x-4">
             {user ? (
-              
               <div className="flex items-center gap-3 md:gap-6">
                 
                 {/* Dashboard Button */}
@@ -91,7 +116,7 @@ function Navbar() {
                       {user.profilePic ? (
                         <img src={user.profilePic} alt="Profile" className="w-full h-full rounded-full object-cover" />
                       ) : (
-                        <div className="w-full h-full rounded-full bg-linear-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white font-bold text-sm">
+                        <div className="w-full h-full rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white font-bold text-sm">
                           {user.fullName?.charAt(0).toUpperCase() || 'U'}
                         </div>
                       )}
@@ -145,7 +170,7 @@ function Navbar() {
                 <Link to="/signin" className="text-gray-300 hover:text-cyan-400 text-sm font-semibold transition-colors duration-300">
                   Sign In
                 </Link>
-                <Link to="/signup" className="bg-linear-to-r from-cyan-500 to-blue-600 text-white hover:from-cyan-400 hover:to-blue-500 px-5 py-2 rounded-xl text-sm font-bold transition-all duration-300 shadow-[0_0_10px_rgba(6,182,212,0.3)] hover:shadow-[0_0_20px_rgba(6,182,212,0.5)] transform hover:-translate-y-0.5">
+                <Link to="/signup" className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white hover:from-cyan-400 hover:to-blue-500 px-5 py-2 rounded-xl text-sm font-bold transition-all duration-300 shadow-[0_0_10px_rgba(6,182,212,0.3)] hover:shadow-[0_0_20px_rgba(6,182,212,0.5)] transform hover:-translate-y-0.5">
                   Sign Up
                 </Link>
               </div>
