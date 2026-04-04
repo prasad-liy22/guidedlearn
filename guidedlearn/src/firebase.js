@@ -8,11 +8,11 @@ import { getFunctions } from 'firebase/functions';
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: "guidedlearn-bf639",
-  storageBucket: "guidedlearn-bf639.firebasestorage.app",
-  messagingSenderId: "12553481897",
-  appId: "1:12553481897:web:cb179fd2df311940b2c3b8",
-  measurementId: "G-L6ZW59TSGL"
+  projectId: "g-learn-cdc71",
+  storageBucket: "g-learn-cdc71.firebasestorage.app",
+  messagingSenderId: "683087394494",
+  appId: "1:683087394494:web:2b9ce7488ea93bd047d0ef",
+  measurementId: "G-230H57LR6T"
 };
 
 

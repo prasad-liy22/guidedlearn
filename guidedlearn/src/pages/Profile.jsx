@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { db, storage } from '../firebase';
-import { doc, updateDoc, collection, query, where, getDocs } from 'firebase/firestore';
+import { doc, setDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { useNavigate } from 'react-router-dom';
 import { 
@@ -85,7 +85,7 @@ export default function Profile() {
         newCoverUrl = await getDownloadURL(cRef);
       }
 
-      await updateDoc(doc(db, 'users', user.uid), {
+      await setDoc(doc(db, 'users', user.uid), {
         ...formData,
         profilePic: newProfileUrl,
         coverPic: newCoverUrl
@@ -106,7 +106,6 @@ export default function Profile() {
   };
 
   if (!userData) return <div className="min-h-screen bg-[#020617] flex justify-center items-center"><Loader2 className="animate-spin text-cyan-500 w-10 h-10" /></div>;
-
   return (
     <div className="min-h-screen bg-[#020617] pb-20 overflow-x-hidden pt-16 md:pt-0">
       

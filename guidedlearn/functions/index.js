@@ -131,7 +131,6 @@ exports.generateRoadmap = onCall({
   try {
     const result = await model.generateContent(prompt);
     let response = result.response.text();
-    // JSON එක විතරක් පිරිසිදුව වෙන් කරගන්නවා
     return JSON.parse(response.replace(/```json/gi, '').replace(/```/gi, '').trim());
   } catch (error) {
     throw new HttpsError("internal", "Roadmap Generation Failed: " + error.message);

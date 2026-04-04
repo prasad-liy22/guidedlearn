@@ -1,5 +1,9 @@
 {
   "projects": {
-    "default": "guidedlearn-bf639"
-  }
+    "default": "guidedlearn-bf639",
+    "staging": "guidedlearn-bf639",
+    "No": "g-learn-cdc71"
+  },
+  "targets": {},
+  "etags": {}
 }

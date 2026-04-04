@@ -30,6 +30,7 @@ function App() {
 
   const hideNavbarRoutes = ['/signin', '/signup', '/verify-email'];
   const shouldHideNavbar = hideNavbarRoutes.includes(location.pathname);
+  console.log("3. App.jsx එක Render වෙනවා");
 
   return (
     <div className="min-h-screen w-full bg-linear-to-br from-slate-950 via-slate-900 to-cyan-950 font-sans text-slate-100">

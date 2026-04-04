@@ -22,7 +22,6 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-
     const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
       
@@ -31,6 +30,13 @@ export function AuthProvider({ children }) {
         const unsubscribeDoc = onSnapshot(userRef, (docSnap) => {
           if (docSnap.exists()) {
             setUserData(docSnap.data());
+          } else {
+            setUserData({
+              fullName: currentUser.displayName || 'New User',
+              email: currentUser.email,
+              profilePic: currentUser.photoURL || '',
+              role: 'Student'
+            });
           }
           setLoading(false);
         });
